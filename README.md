@@ -7,7 +7,7 @@ Open-source applications and tools for rooted **LG webOS** TVs. Every publicly l
 | Application | Version | Platform | Details |
 | --- | --- | --- | --- |
 | [AmneziaWG Universal](apps/amneziawg-universal/README.md) | [v1.0.3 beta](https://github.com/belykot90-maker/LG-WebOS-stuff/releases/tag/awgu-v1.0.3) | Rooted **webOS 4.x / ARMv7**, no webOS 5.0+ required | Configurable VPN for **your own** AmneziaWG VPS, optional cold-boot autostart and yellow-button hold toggle |
-| [VK AdSkip Universal](apps/vk-adskip/README.md) | [v0.5.0 beta](https://github.com/belykot90-maker/LG-WebOS-stuff/releases/tag/vkadskip-v0.5.0) | Rooted LG webOS; verified original VK Video 2.4.76 on webOS 4.x | Experimental VK Video advertisement handling with backup and rollback |
+| [VK AdSkip Universal](apps/vk-adskip/README.md) | [v0.5.0 beta](https://github.com/belykot90-maker/LG-WebOS-stuff/releases/tag/vkadskip-v0.5.0) | Rooted LG webOS; verified original VK Video 2.4.76 on webOS 4.x | Attempts to skip VK Video ads; can also restore missing player button icons using the font already installed with VK Video (not downloaded or shared). Backup and rollback included |
 
 These two packages replace the separate *personal* VPN Controller / VPN Tools and VK AdSkip test installer. Those personal scripts are not published.
 
