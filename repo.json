@@ -1,11 +1,22 @@
 {
   "paging": {
     "page": 1,
-    "count": 0,
+    "count": 1,
     "maxPage": 1,
-    "itemsTotal": 0,
+    "itemsTotal": 1,
     "prevUrl": null,
     "nextUrl": null
   },
-  "packages": []
+  "packages": [
+    {
+      "id": "com.konstantin.awguniversal",
+      "title": "AmneziaWG Universal — webOS 4.x",
+      "iconUri": "https://raw.githubusercontent.com/belykot90-maker/LG-WebOS-stuff/main/apps/amneziawg-universal/assets/icon.png",
+      "manifestUrl": "https://github.com/belykot90-maker/LG-WebOS-stuff/releases/download/awgu-v1.0.2/com.konstantin.awguniversal.manifest.json",
+      "category": "utility",
+      "pool": "main",
+      "shortDescription": "Configurable AmneziaWG 3.1 VPN for rooted LG webOS 4.x ARMv7. Own VPS .conf required.",
+      "fullDescriptionUrl": "https://github.com/belykot90-maker/LG-WebOS-stuff/blob/main/apps/amneziawg-universal/README.md"
+    }
+  ]
 }
