@@ -1,34 +1,88 @@
-# VK AdSkip Universal for LG webOS
+# VK AdSkip Universal для LG webOS
 
-Experimental independent community add-on for the **VK Video** application on rooted LG webOS TVs. This is not an official VK product.
+**VK AdSkip Universal** — экспериментальное дополнение для приложения **VK Видео** на телевизорах LG с root-доступом. Оно пытается автоматически пропускать распознанные рекламные вставки при просмотре видео.
 
-## Install from Homebrew Channel
+Это **не отдельный видеоплеер и не VPN**. VK Видео должно быть уже установлено на телевизоре. Проект независимый, неофициальный и не связан с VK или LG.
 
-Add the public catalog:
+> **Версия 0.5.0 (beta).** Испытывалось на LG webOS 4.10 с VK Видео 2.4.76. На других моделях, версиях webOS и версиях VK Видео работа не подтверждена. Root и Homebrew Channel обязательны.
 
-```
-https://raw.githubusercontent.com/belykot90-maker/LG-WebOS-stuff/main/repo.json
-```
+## Что делает приложение
 
-Install **VK AdSkip Universal**, open the installer, and choose **Установить / обновить**. The installed VK Video app is required. Restart VK Video after installing.
+При установке дополнение добавляет небольшой пользовательский JavaScript в уже установленное VK Видео. Когда начинается воспроизведение, скрипт:
 
-The add-on stores a previous `webOSUserScripts/userScript.js` backup on the TV, writes a new reversible script, and uses the VK app's **own** original icon font where available. No VK font, media content or proprietary app source is distributed.
+1. Проверяет, не похоже ли текущее видео на рекламную вставку, по адресу медиапотока и видимым признакам рекламы в плеере.
+2. Если реклама распознана, пытается перемотать её к концу.
+3. Может временно скрыть изображение рекламного ролика и приглушить звук, чтобы реклама не мешала просмотру.
+4. Возвращает обычное воспроизведение, когда проверка заканчивается или срабатывает ограничение по времени.
 
-## Supported versions
+**Важно:** пропуск рекламы не гарантирован. VK может изменить плеер, адреса потоков или способ показа рекламы. В некоторых случаях реклама продолжит воспроизводиться.
 
-Tested only with VK Video 2.4.76 / LG webOS 4.10 on one TV. Behavior on other VK Video versions and webOS generations is **unverified**. Root and the Homebrew Channel are required. Changes to VK Video might break script injection, ad identification or icon rendering.
+## Зачем приложению нужен шрифт значков VK Видео?
 
-## Behavior and limitations
+**Это дополнительное исправление интерфейса, а не способ блокировки рекламы.**
 
-- Checks the player for currently recognized advertisement source and on-screen ad labels.
-- Attempts HTML5 video seeking. It cannot guarantee all ads will be skipped and may not work against server-enforced ads.
-- Temporarily hides and mutes a recognized ad; attempts to restore original visibility and volume if the guard times out.
-- No telemetry, analytics or requests to external servers.
-- **Откатить** restores the previous user script (or removes our script if there was none). It refuses to overwrite an unrelated script if changes were detected.
-- Original VK Video files remain the property of their respective owners.
+В плеере VK Видео кнопки — например, воспроизведение, пауза, полноэкранный режим и другие элементы управления — могут отображаться с помощью **специального шрифта значков**. В таком шрифте вместо букв находятся маленькие графические символы.
 
-**Beta v0.5.0.** Designed as a standalone, non-VPN utility; no personal IP addresses, private keys or servers are required.
+При наших испытаниях на одной версии VK Видео после внедрения пользовательского скрипта некоторые значки плеера переставали отображаться корректно: вместо привычных кнопок появлялись пустые квадратики. Поэтому мы предусмотрели восстановление доступа к оригинальному шрифту.
 
-## Files
+**Почему шрифт берётся с самого телевизора?**
 
-`src/adskip.js` — standalone browser-side ad handler. `src/install.sh` — safe root-level install/rollback. `src/font-prefix.js`, `font-suffix.js` — reconstruct original icon CSS only from a font already installed on the TV. `src/index.html` — remote control interface.
+- Шрифт **уже входит в установленное на телевизоре приложение VK Видео**. Пользователю не нужно отдельно скачивать значки.
+- Установщик ищет существующий файл шрифта VK Видео (в проверенной версии — `styles/a569de1.ttf`) и, если находит, встраивает его **локальную копию в устанавливаемый пользовательский скрипт**. Это позволяет скрипту подключить тот же шрифт для отображения кнопок.
+- Исходный файл шрифта **не изменяется и не удаляется**.
+- Шрифт не включён в наш публичный IPK и не размещён в GitHub — мы не распространяем чужие файлы VK.
+- Шрифт **никуда не отправляется**: копирование и подготовка происходят непосредственно на телевизоре.
+
+**Если значки и так отображаются правильно**, специальное восстановление может быть не нужно; это лишь мера совместимости, предусмотренная установщиком. **Если нужный файл шрифта не найден**, установка AdSkip продолжится без этого исправления. Пропуск рекламы и отображение значков — две отдельные функции.
+
+На других версиях VK Видео файл шрифта может называться иначе или иметь другой формат. Поэтому исправление значков там не гарантируется.
+
+## Установка
+
+1. Установите на телевизор **VK Видео**, если оно ещё не установлено.
+2. На телевизоре с root откройте **Homebrew Channel → Settings → Add repository**.
+3. Добавьте наш публичный каталог:
+
+   ```text
+   https://raw.githubusercontent.com/belykot90-maker/LG-WebOS-stuff/main/repo.json
+   ```
+
+4. Обновите список и установите **VK AdSkip Universal**.
+5. Откройте установщик и выберите **«Установить / обновить»**.
+6. Полностью закройте VK Видео и откройте его заново. Проверьте воспроизведение и значки управления.
+
+## Как удалить и вернуть всё обратно
+
+В приложении **VK AdSkip Universal** нажмите **«Откатить»**, затем перезапустите VK Видео.
+
+Перед изменением пользовательского скрипта установщик сохраняет его предыдущую версию на **самом телевизоре**. При откате она восстанавливается. Если ранее пользовательского скрипта не было, установщик удаляет только добавленный им файл.
+
+Установщик также отказывается перезаписывать чужой скрипт, если обнаруживает конфликт с сохранённой копией. Это помогает избежать случайной потери изменений, сделанных другим дополнением.
+
+## Ограничения и конфиденциальность
+
+- **Root-доступ обязателен.** Это экспериментальное изменение файлов установленного приложения VK Видео.
+- Программа не модифицирует VPN, не требует собственного сервера и не содержит личных сетевых настроек автора.
+- В AdSkip нет аналитики, телеметрии и отправки данных на сторонние серверы.
+- Для исправления значков используется только шрифт, уже находящийся на **этом телевизоре**.
+- Обновление VK Видео может заменить пользовательский скрипт, изменить путь к шрифту или сделать дополнение несовместимым.
+- Публикуется только наш код; исходники VK Видео, его видеофайлы и оригинальные шрифты в репозитории отсутствуют.
+
+## For English-speaking users
+
+**VK AdSkip Universal** is an experimental, unofficial add-on for the existing VK Video app on rooted LG webOS TVs. It attempts to identify and skip some video advertisements; successful skipping is not guaranteed.
+
+**Why does it access VK Video's icon font?** Some versions of the VK Video player display play/pause and other controls using a custom icon font rather than ordinary images. During testing, installing a user script on one supported setup caused some controls to appear as empty squares. As an optional compatibility workaround, the installer reads the font **already present on the user's TV**, embeds it locally into the new user script, and lets the player use its familiar icons. This has **nothing to do with detecting or skipping ads**.
+
+The original font is left unchanged. The font is **not bundled in our IPK**, uploaded to GitHub, or sent over the network. If it is missing, ad-skip installation proceeds without the icon workaround. Compatibility with other VK Video versions is unverified.
+
+To install, add the GitHub Homebrew repository URL above, install VK AdSkip Universal, select **Install / Update**, and restart VK Video. **Rollback** restores the previous user script when possible. Tested with VK Video 2.4.76 on LG webOS 4.10; root and Homebrew Channel are required.
+
+## Для разработчиков
+
+- `src/adskip.js` — распознавание рекламы, попытки перемотки, временное скрытие и приглушение.
+- `src/install.sh` — установка, создание резервной копии и откат.
+- `src/font-prefix.js` / `src/font-suffix.js` — формирование правила CSS для **локально найденного** шрифта; сам шрифт не входит в проект.
+- `src/index.html` — интерфейс установщика для телевизора.
+
+**Лицензия собственного кода:** MIT. **Релиз:** [VK AdSkip Universal v0.5.0](https://github.com/belykot90-maker/LG-WebOS-stuff/releases/tag/vkadskip-v0.5.0).
