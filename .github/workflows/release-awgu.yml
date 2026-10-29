@@ -1,0 +1,137 @@
+name: Build and publish AmneziaWG Universal for LG webOS 4.x
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/release-awgu.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: awgu-release
+  cancel-in-progress: false
+
+jobs:
+  package:
+    runs-on: ubuntu-24.04
+    if: github.repository == 'belykot90-maker/LG-WebOS-stuff'
+    timeout-minutes: 35
+    env:
+      APP_DIR: apps/amneziawg-universal
+      RELEASE_TAG: awgu-v1.0.2
+      AWG_TOOLS_REF: v3.1.20260812
+      AWG_GO_REF: v3.1.20260828
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+          fetch-depth: 0
+
+      - name: Install ARMv7 build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends gcc-arm-linux-gnueabihf libc6-dev-armhf-cross make file binutils
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.25.0'
+          cache: false
+
+      - name: Verify upstream refs and build from official source
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p upstream
+          git clone --quiet --depth 1 --branch "$AWG_TOOLS_REF" https://github.com/amnezia-vpn/amneziawg-tools.git upstream/tools
+          git clone --quiet --depth 1 --branch "$AWG_GO_REF" https://github.com/amnezia-vpn/amneziawg-go.git upstream/go
+          test "$(git -C upstream/tools rev-parse HEAD)" = "ee0f0a9aa34ff0a0da4b3433b9512781cfe02843"
+          test "$(git -C upstream/go rev-parse HEAD)" = "b5928efb6ca19f0153958460c3d141f04abc5c2e"
+          mkdir -p "$APP_DIR/vendor"
+          # Link statically: webOS 4.x uses an older libc than Ubuntu.
+          CFLAGS='-O2 -static' make -C upstream/tools/src CC=arm-linux-gnueabihf-gcc LDFLAGS=-static
+          install -m 0755 upstream/tools/src/wg "$APP_DIR/vendor/awg"
+          (cd upstream/go && env CGO_ENABLED=0 GOOS=linux GOARCH=arm GOARM=7 GOFLAGS=-trimpath go build -ldflags='-s -w' -o "../../$APP_DIR/vendor/amneziawg-go" .)
+          file "$APP_DIR/vendor/awg" "$APP_DIR/vendor/amneziawg-go"
+          file "$APP_DIR/vendor/awg" | grep -E 'ARM.*statically linked|ARM.*static-pie linked'
+          file "$APP_DIR/vendor/amneziawg-go" | grep -E 'ARM.*statically linked|ARM.*static-pie linked'
+          cp upstream/tools/COPYING "$APP_DIR/vendor/awg-tools-COPYING"
+          cp upstream/go/LICENSE "$APP_DIR/vendor/awg-go-LICENSE"
+
+      - name: Generate public IPv4-RU list from RIPE delegated data
+        run: python3 apps/amneziawg-universal/scripts/generate_ru_prefixes.py
+
+      - name: Verify app sources and shell scripts
+        run: |
+          set -euo pipefail
+          node --check apps/amneziawg-universal/src/manager.js
+          node --check apps/amneziawg-universal/src/portal.js
+          node --check apps/amneziawg-universal/src/webOSTV.js
+          for f in apps/amneziawg-universal/src/*.sh; do sh -n "$f"; done
+          python3 apps/amneziawg-universal/tests/test_profile.py
+
+      - name: Build IPK and manifest pointing to GitHub
+        run: |
+          set -euo pipefail
+          python3 "$APP_DIR/scripts/build_ipk.py" --base-url "https://github.com/$GITHUB_REPOSITORY/releases/download/$RELEASE_TAG"
+          cd "$APP_DIR"
+          tar -czf dist/amneziawg-upstream-sources-v1.0.2.tar.gz -C ../../upstream tools go
+          (cd dist && sha256sum *.ipk *.tar.gz > SHA256SUMS.txt)
+
+      - name: Upload beta release and corresponding source
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          d="$APP_DIR/dist"
+          if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            gh release upload "$RELEASE_TAG" "$d/"*.ipk "$d/"*.manifest.json "$d/"*.tar.gz "$d/SHA256SUMS.txt" --clobber
+          else
+            gh release create "$RELEASE_TAG" "$d/"*.ipk "$d/"*.manifest.json "$d/"*.tar.gz "$d/SHA256SUMS.txt" \
+              --title 'AmneziaWG Universal v1.0.2 (webOS 4.x ARMv7)' \
+              --notes 'Experimental public beta for rooted LG webOS 4.x ARMv7. Configure your OWN AmneziaWG VPS using a .conf profile. IPv4 only; no DNS-leak protection or kill switch. Local phone upload uses unencrypted HTTP and must only be used on a trusted LAN. The accompanying upstream source archive and notices document third-party GPL/MIT components. Not tested with independent VPS configurations.' \
+              --prerelease --latest=false --target "$GITHUB_SHA"
+          fi
+
+      - name: Add exclusively GitHub-hosted package to Homebrew catalog
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json,pathlib
+          root=pathlib.Path('.')
+          manifest=json.loads((root/'apps/amneziawg-universal/dist/com.konstantin.awguniversal.manifest.json').read_text())
+          assert manifest['ipkUrl'].startswith('https://github.com/belykot90-maker/LG-WebOS-stuff/releases/download/')
+          data=json.loads((root/'repo.json').read_text())
+          app={
+            'id':'com.konstantin.awguniversal',
+            'title':'AmneziaWG Universal — webOS 4.x',
+            'iconUri':'https://raw.githubusercontent.com/belykot90-maker/LG-WebOS-stuff/main/apps/amneziawg-universal/assets/icon.png',
+            'manifestUrl':'https://github.com/belykot90-maker/LG-WebOS-stuff/releases/download/awgu-v1.0.2/com.konstantin.awguniversal.manifest.json',
+            'category':'utility',
+            'pool':'main',
+            'shortDescription':'Configurable AmneziaWG 3.1 VPN for rooted LG webOS 4.x ARMv7. Own VPS .conf required.',
+            'fullDescriptionUrl':'https://github.com/belykot90-maker/LG-WebOS-stuff/blob/main/apps/amneziawg-universal/README.md'
+          }
+          apps=[x for x in data.get('packages',[]) if x.get('id')!=app['id']]
+          apps.append(app)
+          data={'paging':{'page':1,'count':len(apps),'maxPage':1,'itemsTotal':len(apps),
+                 'prevUrl':None,'nextUrl':None},'packages':apps}
+          (root/'repo.json').write_text(json.dumps(data,indent=2,ensure_ascii=False)+'\n')
+          print('GitHub-only Homebrew apps:',len(apps))
+          PY
+          git config user.name github-actions
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add repo.json
+          if git diff --cached --quiet; then
+            echo 'Homebrew catalog already current'
+          else
+            git commit -m 'Publish GitHub-only AmneziaWG Universal v1.0.2'
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi
