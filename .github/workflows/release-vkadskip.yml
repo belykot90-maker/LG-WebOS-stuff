@@ -1,0 +1,88 @@
+name: Publish VK AdSkip Universal beta
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/release-vkadskip.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: vk-adskip-release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    if: github.repository == 'belykot90-maker/LG-WebOS-stuff'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      ROOT: apps/vk-adskip
+      TAG: vkadskip-v0.5.0
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Validate javascript and installer
+        run: |
+          node --check apps/vk-adskip/src/adskip.js
+          node --check apps/vk-adskip/src/font-prefix.js || test $? -eq 1
+          sh -n apps/vk-adskip/src/install.sh
+          python apps/vk-adskip/tests/test_installer.py
+      - name: Build and verify package
+        run: |
+          python "$ROOT/scripts/build_ipk.py"
+          (cd "$ROOT/dist" && sha256sum *.ipk > SHA256SUMS.txt)
+      - name: Publish GitHub pre-release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          d="$ROOT/dist"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" "$d/"*.ipk "$d/"*.manifest.json "$d/SHA256SUMS.txt" --clobber
+          else
+            gh release create "$TAG" "$d/"*.ipk "$d/"*.manifest.json "$d/SHA256SUMS.txt" \
+              --title 'VK AdSkip Universal v0.5.0 (beta)' \
+              --notes 'Experimental standalone VK Video user script for rooted LG webOS, with safe installation and rollback. No VPN connection, private server address, VK app binary or proprietary font is included. Tested originally against VK Video 2.4.76 on LG webOS 4.x; other versions are unverified.' \
+              --prerelease --latest=false --target "$GITHUB_SHA"
+          fi
+      - name: Publish GitHub-only Homebrew entry
+        run: |
+          python3 - <<'PY'
+          import json,pathlib
+          root=pathlib.Path('.')
+          m=json.loads((root/'apps/vk-adskip/dist/com.konstantin.vkadskipuniversal.manifest.json').read_text())
+          assert m['ipkUrl'].startswith('https://github.com/belykot90-maker/LG-WebOS-stuff/releases/download/')
+          p=root/'repo.json';data=json.loads(p.read_text())
+          e={'id':'com.konstantin.vkadskipuniversal','title':'VK AdSkip Universal',
+          'iconUri':'https://raw.githubusercontent.com/belykot90-maker/LG-WebOS-stuff/main/apps/vk-adskip/assets/icon.png',
+          'manifestUrl':'https://github.com/belykot90-maker/LG-WebOS-stuff/releases/download/vkadskip-v0.5.0/com.konstantin.vkadskipuniversal.manifest.json',
+          'category':'utility','pool':'main',
+          'shortDescription':'Experimental ad skip for VK Video on rooted LG webOS with safe rollback.',
+          'fullDescriptionUrl':'https://github.com/belykot90-maker/LG-WebOS-stuff/blob/main/apps/vk-adskip/README.md'}
+          a=[x for x in data['packages'] if x.get('id')!=e['id']]
+          a.append(e)
+          data={'paging':{'page':1,'count':len(a),'maxPage':1,'itemsTotal':len(a),'prevUrl':None,'nextUrl':None},'packages':a}
+          p.write_text(json.dumps(data,indent=2,ensure_ascii=False)+'\n')
+          PY
+      - name: Commit Homebrew catalog
+        run: |
+          git config user.name github-actions
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add repo.json
+          if ! git diff --cached --quiet; then
+            git commit -m 'Publish VK AdSkip Universal v0.5.0 in Homebrew catalog'
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi
