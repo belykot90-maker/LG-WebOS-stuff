@@ -2,13 +2,19 @@
 
 Independent, configurable AmneziaWG VPN client for **rooted LG webOS 4.x ARMv7**. The client uses a native `.conf` profile from the user's **own VPS**. webOS 5.0 or newer is **not required**.
 
-**Status:** experimental beta v1.0.1. Profile parsing, on-TV storage and one-time local upload were tested on LG webOS 4.10.x / ARMv7 / Node.js 0.12.2. Connections to independent users' VPN servers and other TV models remain unverified.
+**Status:** experimental beta v1.0.2. Profile parsing, on-TV storage and one-time local upload were tested on LG webOS 4.10.x / ARMv7 / Node.js 0.12.2. Connections to independent users' VPN servers and other TV models remain unverified.
 
-## Install
+## Install from Homebrew Channel
 
-When GitHub-hosted installable assets are available, add this [GitHub Homebrew repository](../../repo.json) to the Homebrew Channel using the URL in [HOME_BREW.md](../../HOME_BREW.md). There is currently **no GitHub-hosted installable release**; the repository catalog is intentionally empty. Do not use someone's private VPN infrastructure for distribution.
+1. On a **rooted LG webOS 4.x / ARMv7** TV, open **Homebrew Channel → Settings → Add repository**.
+2. Enter `https://raw.githubusercontent.com/belykot90-maker/LG-WebOS-stuff/main/repo.json` and refresh apps.
+3. Find **AmneziaWG Universal — webOS 4.x** and choose Install.
+4. Launch the app and select **Установить компоненты** to enable the client binaries.
+5. Export a native AmneziaWG `.conf` from **your own** VPS and import it through the app.
 
-For a source build, see `scripts/build_ipk.py` and the third-party notices.
+**GitHub beta release:** [AmneziaWG Universal v1.0.2](https://github.com/belykot90-maker/LG-WebOS-stuff/releases/tag/awgu-v1.0.2). It contains the IPK, manifest, corresponding upstream sources and checksums.
+
+For a reproducible source build, see `scripts/build_ipk.py`, `scripts/generate_ru_prefixes.py` and the GitHub release workflow.
 
 ## Configure your VPS profile
 
@@ -42,10 +48,10 @@ Private profiles are stored on the TV with restrictive file permissions, **not o
 
 ## Licensing and third-party code
 
-Original application source: MIT (see LICENSE). AmneziaWG binaries and LG SDK components are **not included in the GitHub source tree**, and must be obtained, built and distributed in accordance with their own terms. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). The source packager requires external vendor inputs.
+Original application source: MIT (see LICENSE). Public IPKs include upstream `amneziawg-tools` (GPL-2.0) and `amneziawg-go` (MIT) compiled from pinned upstream tags in GitHub Actions. The release includes both source archives and license notices. The minimal webOS service bridge is original MIT-licensed code, not a redistributed LG SDK library. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
 ## Русский
 
 Универсальный AmneziaWG-клиент для **LG webOS 4.x (ARMv7)** с root и Homebrew Channel. Требует собственный VPS и файл `.conf`. Не нужен webOS 5.0+. Конфигурация импортируется с телефона по локальному адресу телевизора и одноразовому коду или вставкой текста в интерфейсе. При использовании локального HTTP-портала ключ передаётся без шифрования, поэтому необходима доверенная домашняя сеть.
 
-Это экспериментальная версия. Исходники размещены на GitHub; установочные файлы будут публиковаться здесь отдельно после проверки сборки и лицензий, без использования чьего-либо личного сервера.
+Это экспериментальная версия 1.0.2. Исходники и готовый установочный IPK уже доступны в GitHub Releases, а пакет добавлен в отдельный GitHub-репозиторий для Homebrew Channel. Личный VPS автора в распространении не участвует.
