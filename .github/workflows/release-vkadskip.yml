@@ -5,7 +5,10 @@ on:
     branches: [main]
     paths:
       - .github/workflows/release-vkadskip.yml
-      - apps/vk-adskip/**
+      - apps/vk-adskip/src/**
+      - apps/vk-adskip/scripts/**
+      - apps/vk-adskip/tests/**
+      - apps/vk-adskip/assets/**
   workflow_dispatch:
 
 permissions:
