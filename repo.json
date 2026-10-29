@@ -15,8 +15,8 @@
       "manifestUrl": "https://github.com/belykot90-maker/LG-WebOS-stuff/releases/download/awgu-v1.0.3/com.konstantin.awguniversal.manifest.json",
       "category": "utility",
       "pool": "main",
-      "shortDescription": "Configurable AmneziaWG 3.1 VPN for rooted LG webOS 4.x ARMv7. Own VPS .conf required.",
-      "fullDescriptionUrl": "https://github.com/belykot90-maker/LG-WebOS-stuff/blob/main/apps/amneziawg-universal/README.md"
+      "shortDescription": "VPN для LG webOS 4.x (root, ARMv7) с собственным сервером AmneziaWG. Импорт .conf с телефона, автозапуск и опциональная жёлтая кнопка.",
+      "fullDescriptionUrl": "https://raw.githubusercontent.com/belykot90-maker/LG-WebOS-stuff/main/homebrew-descriptions/amneziawg-universal.html"
     },
     {
       "id": "com.konstantin.vkadskipuniversal",
@@ -25,8 +25,8 @@
       "manifestUrl": "https://github.com/belykot90-maker/LG-WebOS-stuff/releases/download/vkadskip-v0.5.0/com.konstantin.vkadskipuniversal.manifest.json",
       "category": "utility",
       "pool": "main",
-      "shortDescription": "Experimental ad skip for VK Video on rooted LG webOS with safe rollback.",
-      "fullDescriptionUrl": "https://github.com/belykot90-maker/LG-WebOS-stuff/blob/main/apps/vk-adskip/README.md"
+      "shortDescription": "Попытка пропуска рекламы VK Видео. При необходимости восстанавливает значки кнопок с помощью шрифта, уже установленного на ТВ. Есть откат. Требуется root.",
+      "fullDescriptionUrl": "https://raw.githubusercontent.com/belykot90-maker/LG-WebOS-stuff/main/homebrew-descriptions/vk-adskip.html"
     }
   ]
 }
