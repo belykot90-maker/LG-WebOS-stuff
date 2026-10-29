@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - .github/workflows/release-vkadskip.yml
+      - apps/vk-adskip/**
   workflow_dispatch:
 
 permissions:
@@ -36,7 +37,7 @@ jobs:
       - name: Validate javascript and installer
         run: |
           node --check apps/vk-adskip/src/adskip.js
-          node --check apps/vk-adskip/src/font-prefix.js || test $? -eq 1
+          # font-prefix.js is intentionally a fragment joined with the TV's own font
           sh -n apps/vk-adskip/src/install.sh
           python apps/vk-adskip/tests/test_installer.py
       - name: Build and verify package
