@@ -12,10 +12,10 @@ var PEER_KEYS=['PublicKey','PresharedKey','AllowedIPs','Endpoint','PersistentKee
 function fail(msg){process.stderr.write('ERROR: '+msg+'\n');process.exit(2);}
 function mkdir(d){if(!fs.existsSync(d))fs.mkdirSync(d,parseInt('700',8));}
 function readSettings(){
- var r={mode:'full',auto:'0'};
+ var r={mode:'full',auto:'0',key:'0'};
  if(!fs.existsSync(OPTIONS))return r;
  fs.readFileSync(OPTIONS,'utf8').split(/\r?\n/).forEach(function(line){
-  var m=/^AWGU_(MODE|AUTO|ADDRESS|HOST|PORT|MTU|DNS)='([^']*)'$/.exec(line);
+  var m=/^AWGU_(MODE|AUTO|ADDRESS|HOST|PORT|MTU|DNS|KEY)='([^']*)'$/.exec(line);
   if(m){r[m[1].toLowerCase()]=m[2];}
  });
  return r;
@@ -28,7 +28,7 @@ function writeAtomic(name,body){
  fs.chmodSync(temp,parseInt('600',8));fs.renameSync(temp,name);
 }
 function saveSettings(v){
- var order=['mode','auto','address','host','port','mtu','dns'];
+ var order=['mode','auto','key','address','host','port','mtu','dns'];
  var b='';
  order.forEach(function(k){
   var val=String(v[k]||'');
@@ -134,10 +134,19 @@ if(action==='import'){
  if(auto==='1'&&!fs.existsSync(CFG))fail('Import profile first');
  var v=readSettings();v.auto=auto;saveSettings(v);
  process.stdout.write('AUTOSTART '+auto+'\n');
+}else if(action==='key'){
+ var flag=process.argv[3];
+ if(flag!=='0'&&flag!=='1')fail('Remote shortcut must be 0 or 1');
+ var opt=readSettings();opt.key=flag;saveSettings(opt);
+ cp.execFile('/bin/sh',[BASE+'/keywatch.sh',flag==='1'?'start':'stop'],{timeout:8000},function(err,out,stderr){
+  if(err)fail('Key watcher: '+String(stderr||err.message).slice(0,160));
+  process.stdout.write('YELLOW_KEY '+flag+'\n'+String(out||''));
+ });
 }else if(action==='status'){
  var opt=readSettings();
  process.stdout.write('PROFILE '+(fs.existsSync(CFG)?'READY':'MISSING')+'\n');
  process.stdout.write('ENDPOINT '+(opt.host||'-')+':'+(opt.port||'-')+'\n');
  process.stdout.write('MODE '+opt.mode+'\n');
  process.stdout.write('AUTOSTART '+opt.auto+'\n');
+ process.stdout.write('YELLOW_KEY '+(opt.key||'0')+'\n');
 }else fail('Unknown command');

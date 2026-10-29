@@ -16,7 +16,7 @@ border-radius:10px;font:18px monospace;padding:12px;resize:vertical}
 #report{white-space:pre-wrap;font:19px monospace;min-height:60px;color:#e7ce9a;line-height:1.4}
 small{color:#91a5b8}label{display:block;margin:9px 0;font-size:20px}
 </style><script src="webOSTV.js"></script></head>
-<body><h1>AmneziaWG Universal</h1><div class="sub">Для LG webOS 4.x · ARMv7 · нужен root / Homebrew Channel · версия 1.0.2</div>
+<body><h1>AmneziaWG Universal</h1><div class="sub">Для LG webOS 4.x · ARMv7 · нужен root / Homebrew Channel · версия 1.0.3</div>
 <div class="layout">
 <div class="left">
 <section><h2>Подключение</h2>
@@ -31,7 +31,9 @@ small{color:#91a5b8}label{display:block;margin:9px 0;font-size:20px}
 <button class="alt" onclick="run('mode-ru')">RU напрямую</button>
 <button class="alt" onclick="run('auto-1')">Автозапуск ON</button>
 <button class="alt" onclick="run('auto-0')">Автозапуск OFF</button>
-<small>Изменять маршрутизацию нужно при выключенном VPN. Локальная сеть остаётся прямой.</small>
+<button class="alt" onclick="run('key-1')">Жёлтая кнопка ON</button>
+<button class="alt" onclick="run('key-0')">Жёлтая кнопка OFF</button>
+<small>Изменять маршрутизацию нужно при выключенном VPN. Локальная сеть остаётся прямой. Жёлтая кнопка действует только при удержании и изначально выключена. Не включайте одновременно с другим обработчиком этой кнопки.</small>
 </section>
 </div>
 <div class="right">
@@ -93,6 +95,8 @@ window.run=function(action){
  else if(action==='mode-ru')command=MANAGER+' mode ru';
  else if(action==='auto-1')command=MANAGER+' autostart 1';
  else if(action==='auto-0')command=MANAGER+' autostart 0';
+ else if(action==='key-1')command=MANAGER+' key 1';
+ else if(action==='key-0')command=MANAGER+' key 0';
  else return;
  busy=true;report.textContent='Выполняется...';
  remote(command,finish);

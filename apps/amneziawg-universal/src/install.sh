@@ -14,7 +14,7 @@ case "${1:-status}" in
   mkdir -p "$D/bin" "$ROOT"
   chmod 700 "$D"
   # Existing user profile/settings never overwritten by upgrades.
-  for f in manager.js vpn.sh boot.sh boot-worker.sh portal.js portal.html portal.sh;do
+  for f in manager.js vpn.sh boot.sh boot-worker.sh portal.js portal.html portal.sh keywatch.js keywatch.sh toggle.sh;do
    cp "$SRC/files/$f" "$D/$f"
    case "$f" in *.js|*.html)chmod 644 "$D/$f";; *)chmod 755 "$D/$f";; esac
   done
@@ -27,6 +27,7 @@ case "${1:-status}" in
   fi
   chmod 644 "$D/ru-ipv4.txt"
   ln -sf "$D/boot.sh" "$ROOT/90-awgu"
+  [ -r "$D/settings.sh" ] && /bin/sh "$D/keywatch.sh" start >/dev/null 2>&1 || true
   echo 'INSTALLED: ARMv7 AmneziaWG tools. Next: import your .conf profile.'
   ;;
  status)
@@ -34,6 +35,7 @@ case "${1:-status}" in
   if [ -r "$D/vpn.sh" ];then /bin/sh "$D/vpn.sh" status;fi
   ;;
  uninstall)
+  [ -r "$D/keywatch.sh" ] && /bin/sh "$D/keywatch.sh" stop >/dev/null 2>&1 || true
   /bin/sh "$D/vpn.sh" disconnect 2>/dev/null || true
   rm -f "$ROOT/90-awgu"
   echo 'Autostart disabled. Private VPN profile preserved on TV.'

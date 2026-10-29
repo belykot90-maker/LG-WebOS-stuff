@@ -7,8 +7,8 @@ from hashlib import sha256
 import argparse,io,tarfile,struct,json,gzip
 ROOT=Path(__file__).resolve().parents[1]
 APPID='com.konstantin.awguniversal'
-VERSION='1.0.2'
-SOURCES=('manager.js','vpn.sh','boot.sh','boot-worker.sh','portal.js','portal.sh','portal.html')
+VERSION='1.0.3'
+SOURCES=('manager.js','vpn.sh','boot.sh','boot-worker.sh','portal.js','portal.sh','portal.html','keywatch.js','keywatch.sh','toggle.sh')
 VENDOR=('awg','amneziawg-go','ru-ipv4.txt')
 def tarball(files):
     stream=io.BytesIO()
