@@ -1,0 +1,42 @@
+<!doctype html><html lang="ru"><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AmneziaWG · TV profile import</title>
+<style>body{font:17px system-ui,Arial,sans-serif;max-width:650px;margin:35px auto;
+background:#0c1824;color:#e9f5ff;padding:16px}main{background:#192a3b;padding:24px;border-radius:15px}
+textarea{width:100%;height:220px;box-sizing:border-box;border:1px solid #8796a0;background:#081524;color:white}
+input,button{font-size:18px;padding:12px;margin:8px 0;width:100%;box-sizing:border-box}
+button{background:#148656;color:white;border:0;border-radius:8px}pre{white-space:pre-wrap;overflow-wrap:anywhere}
+small{color:#bed1dd}</style><main>
+<h2>AmneziaWG — загрузка профиля на LG</h2>
+<p>Телефон и телевизор должны быть в одной домашней сети.</p>
+<label>Выберите свой конфигурационный .conf файл
+<input type="file" id="file" accept=".conf,text/plain"></label>
+<p>Или вставьте текст конфигурации:</p>
+<textarea id="config" placeholder="[Interface]&#10;PrivateKey = ...&#10;...&#10;[Peer]&#10;..."></textarea>
+<label>Код с экрана телевизора <input type="text" id="pin" pattern="[0-9]{8}" inputmode="numeric" maxlength="8"></label>
+<button type="button" id="send">Сохранить профиль на телевизоре</button>
+<pre id="message"></pre>
+<small>Подключение локальное, без отправки конфигурации в интернет. HTTP в домашней сети не шифруется: используйте только доверенную Wi-Fi сеть. Страница закроется через 5 минут.</small></main>
+<script>
+(function(){
+ var q=function(x){return document.getElementById(x);};
+ q('file').onchange=function(){
+  var f=this.files[0];if(!f)return;
+  if(f.size>16000){q('message').textContent='Файл слишком большой (макс. 16 КБ)';return;}
+  var reader=new FileReader();reader.onload=function(){q('config').value=reader.result;};
+  reader.readAsText(f);
+ };
+ q('send').onclick=function(){
+  var text=q('config').value,code=q('pin').value;
+  if(!/^\d{8}$/.test(code)){q('message').textContent='Введите восьмизначный код с телевизора';return;}
+  if(text.length<90||text.length>16000){q('message').textContent='Проверьте текст конфигурации .conf';return;}
+  var req=new XMLHttpRequest();
+  req.open('POST','/upload?code='+encodeURIComponent(code),true);
+  req.setRequestHeader('Content-Type','text/plain;charset=utf-8');
+  req.onload=function(){q('message').textContent=req.responseText;
+   if(req.status===200)q('config').value='';};
+  req.onerror=function(){q('message').textContent='Не удалось связаться с телевизором';};
+  q('message').textContent='Проверка...';req.send(text);
+ };
+})();
+</script></html>

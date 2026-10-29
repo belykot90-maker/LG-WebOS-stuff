@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ru"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AmneziaWG Universal · webOS 4.x</title>
+<style>
+*{box-sizing:border-box}body{background:#0e1825;color:#e8f1fa;font:23px Arial,sans-serif;margin:0;padding:30px 42px}
+h1{font-size:42px;margin:0 0 8px}h2{font-size:27px;margin:0 0 12px}
+.sub{font-size:19px;color:#9badbf;margin-bottom:20px}
+.layout{display:flex;gap:25px}.left{width:42%}.right{flex:1}
+section{background:#172639;border:1px solid #2c415a;padding:24px;border-radius:14px;margin-bottom:20px}
+button{cursor:pointer;background:#1a885e;border:0;border-radius:9px;color:white;
+font:22px Arial;padding:16px 20px;margin:7px 7px 4px 0}
+button.alt{background:#275078}button.warn{background:#a54648}button:focus,textarea:focus{outline:4px solid white}
+textarea{width:100%;height:260px;background:#081624;color:#f0f7ff;border:2px solid #3a5970;
+border-radius:10px;font:18px monospace;padding:12px;resize:vertical}
+#status{white-space:pre-wrap;font:21px monospace;color:#a5f3d4;line-height:1.4}
+#report{white-space:pre-wrap;font:19px monospace;min-height:60px;color:#e7ce9a;line-height:1.4}
+small{color:#91a5b8}label{display:block;margin:9px 0;font-size:20px}
+</style><script src="webOSTV.js"></script></head>
+<body><h1>AmneziaWG Universal</h1><div class="sub">Для LG webOS 4.x · ARMv7 · нужен root / Homebrew Channel · версия 1.0.1</div>
+<div class="layout">
+<div class="left">
+<section><h2>Подключение</h2>
+<div id="status">Проверка...</div>
+<button onclick="run('connect')" id="bconnect">VPN ON</button>
+<button class="warn" onclick="run('disconnect')">VPN OFF</button>
+<button class="alt" onclick="refresh()">Обновить статус</button>
+</section>
+<section><h2>Компоненты и параметры</h2>
+<button class="alt" onclick="run('install')">Установить компоненты</button>
+<button class="alt" onclick="run('mode-full')">Всё через VPN</button>
+<button class="alt" onclick="run('mode-ru')">RU напрямую</button>
+<button class="alt" onclick="run('auto-1')">Автозапуск ON</button>
+<button class="alt" onclick="run('auto-0')">Автозапуск OFF</button>
+<small>Изменять маршрутизацию нужно при выключенном VPN. Локальная сеть остаётся прямой.</small>
+</section>
+</div>
+<div class="right">
+<section><h2>1. Импорт профиля AmneziaWG</h2>
+<p>Рекомендуемый способ — загрузить файл с телефона или компьютера в домашней сети:</p>
+<button onclick="startPortal()">Загрузить .conf с телефона</button>
+<button class="alt" onclick="stopPortal()">Закрыть приём</button>
+<div id="portal-info" style="font:23px monospace;white-space:pre-wrap;color:#b9efcf;margin:12px 0"></div>
+<small>Временная локальная страница с восьмизначным кодом, работает только 5 минут. Передача по HTTP без шифрования — используйте доверенную домашнюю сеть.</small>
+<p>Или вставьте содержимое файла <strong>.conf</strong> из вашего собственного VPN-сервера:
+[Interface], [Peer], PrivateKey, Address, Endpoint и параметры маскировки.</p>
+<textarea id="profile" spellcheck="false" autocomplete="off" autocapitalize="off"
+placeholder="[Interface]&#10;PrivateKey = ...&#10;Address = 10.x.x.x/32&#10;Jc = ...&#10;...&#10;[Peer]&#10;PublicKey = ...&#10;Endpoint = ваш-vps:порт&#10;AllowedIPs = 0.0.0.0/0"></textarea>
+<div><button onclick="importProfile()">Сохранить профиль только на ТВ</button><button class="alt" onclick="document.getElementById('profile').value=''">Очистить поле</button></div>
+<small>Конфигурация не загружается в интернет и не попадает в публичный репозиторий. При экспорте файла защищайте PrivateKey.</small>
+</section>
+<section><h2>Результат</h2><div id="report">Сначала установите компоненты и импортируйте конфигурацию.</div></section>
+</div>
+</div>
+<script>
+(function(){
+'use strict';
+var ROOT='/media/developer/.awgu', MANAGER='/usr/bin/node '+ROOT+'/manager.js';
+var status=document.getElementById('status'),report=document.getElementById('report'),busy=false;
+function remote(command,done){
+ if(typeof webOS==='undefined'||!webOS.service){done('Homebrew API недоступен');return;}
+ try{
+  webOS.service.request('luna://org.webosbrew.hbchannel.service',{
+   method:'exec',parameters:{command:command},
+   onSuccess:function(r){
+    var err=r.error||r.stderrString||'';
+    done(err||null,r.stdoutString||'');
+   },onFailure:function(r){done(r.errorText||'Не удалось вызвать Homebrew',null);}
+  });
+ }catch(ex){done(String(ex));}
+}
+window.refresh=function(){
+ remote('/bin/sh '+ROOT+'/vpn.sh status; '+MANAGER+' status',function(err,out){
+  status.textContent=err?'Ошибка проверки: '+err:(out||'Нет данных');
+ });
+};
+function finish(err,out){
+ busy=false;
+ report.textContent=err?'Ошибка: '+err:(out||'Готово');
+ window.refresh();
+}
+window.run=function(action){
+ if(busy)return;
+ var command='';
+ if(action==='install'){
+  var app='/media/developer/apps/usr/palm/applications/com.konstantin.awguniversal';
+  var alt='/media/cryptofs/apps/usr/palm/applications/com.konstantin.awguniversal';
+  command='if [ -f '+app+'/install.sh ]; then /bin/sh '+app+'/install.sh install; else /bin/sh '+alt+'/install.sh install; fi';
+ }else if(action==='connect'){
+  command='nohup /bin/sh '+ROOT+'/vpn.sh connect </dev/null >'+ROOT+'/ui.log 2>&1 & echo "CONNECTING"';
+ }else if(action==='disconnect'){
+  command='nohup /bin/sh '+ROOT+'/vpn.sh disconnect </dev/null >'+ROOT+'/ui.log 2>&1 & echo "DISCONNECTING"';
+ }else if(action==='mode-full')command=MANAGER+' mode full';
+ else if(action==='mode-ru')command=MANAGER+' mode ru';
+ else if(action==='auto-1')command=MANAGER+' autostart 1';
+ else if(action==='auto-0')command=MANAGER+' autostart 0';
+ else return;
+ busy=true;report.textContent='Выполняется...';
+ remote(command,finish);
+};
+window.startPortal=function(){
+ if(busy)return;
+ busy=true;report.textContent='Запуск локальной страницы...';
+ remote('/bin/sh '+ROOT+'/portal.sh start',function(err,out){
+  busy=false;
+  if(err){report.textContent='Не удалось запустить: '+err;return;}
+  try{
+   var info=JSON.parse(String(out||'').trim());
+   document.getElementById('portal-info').textContent='Откройте с телефона: '+info.url+'\nОдноразовый код: '+info.pin+'\nПриём открыт на 5 минут';
+   report.textContent='Откройте ссылку в браузере телефона, выберите .conf и введите код.';
+  }catch(e){report.textContent='Ошибка запуска: '+(out||'Нет ответа');}
+ });
+};
+window.stopPortal=function(){
+ remote('/bin/sh '+ROOT+'/portal.sh stop',function(err,out){
+  document.getElementById('portal-info').textContent='';
+  report.textContent=err?'Ошибка: '+err:'Приём закрыт';
+ });
+};
+window.importProfile=function(){
+ if(busy)return;
+ var field=document.getElementById('profile'),raw=field.value||'';
+ if(raw.length<90||raw.length>12000){report.textContent='Ожидается полный текст .conf размером 90–12000 символов.';return;}
+ var b64='';
+ try{b64=btoa(unescape(encodeURIComponent(raw)));}
+ catch(e){report.textContent='Ошибка кодирования текста конфигурации';return;}
+ if(!/^[A-Za-z0-9+/=]+$/.test(b64)){report.textContent='Некорректная конфигурация';return;}
+ busy=true;report.textContent='Проверка и сохранение профиля на ТВ...';
+ remote(MANAGER+' import '+b64,function(err,out){
+   if(!err)field.value='';
+   finish(err,out);
+ });
+};
+document.addEventListener('keydown',function(e){
+ if(e.keyCode===461||e.keyCode===27){if(webOS&&webOS.platformBack)webOS.platformBack();}
+});
+window.refresh();setInterval(window.refresh,3000);
+})();
+</script></body></html>

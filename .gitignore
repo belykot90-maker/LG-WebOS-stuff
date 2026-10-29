@@ -1,0 +1,15 @@
+*.conf
+*.key
+*.pem
+*.p12
+*.pfx
+*.ipk
+.env
+.env.*
+**/vendor/
+**/secrets/
+**/private/
+**/__pycache__/
+*.pyc
+build/
+dist/
