@@ -25,7 +25,7 @@
       "manifestUrl": "https://github.com/belykot90-maker/LG-WebOS-stuff/releases/download/vkadskip-v0.5.0/com.konstantin.vkadskipuniversal.manifest.json",
       "category": "utility",
       "pool": "main",
-      "shortDescription": "Experimental ad skip for VK Video on rooted LG webOS with safe rollback.",
+      "shortDescription": "Помогает пропускать рекламу в VK Видео. При установке может исправить значки кнопок плеера: использует шрифт, уже имеющийся на телевизоре, без загрузки или отправки файлов. Нужен root; экспериментальная версия.",
       "fullDescriptionUrl": "https://github.com/belykot90-maker/LG-WebOS-stuff/blob/main/apps/vk-adskip/README.md"
     }
   ]
