@@ -1,17 +1,16 @@
-# Third-party notices / licenses
+# Third-party licenses and build provenance
 
-The application source here is independent of the third-party AmneziaWG implementation. **Do not interpret the MIT license of this repository as changing third-party licenses.**
+The original TV frontend and management source of **AmneziaWG Universal** is MIT-licensed. Two independently maintained VPN components bundled in release IPKs have separate licenses and copyright notices:
 
-The published Homebrew IPK contains ARMv7 builds of the following separate dependencies. Redistribution and release processes must satisfy their terms:
+- `amneziawg-tools` — **GPL-2.0**, upstream [amnezia-vpn/amneziawg-tools](https://github.com/amnezia-vpn/amneziawg-tools), tag `v3.1.20260812` (commit `ee0f0a9aa34ff0a0da4b3433b9512781cfe02843`).
+- `amneziawg-go` — **MIT**, upstream [amnezia-vpn/amneziawg-go](https://github.com/amnezia-vpn/amneziawg-go), tag `v3.1.20260828` (commit `b5928efb6ca19f0153958460c3d141f04abc5c2e`).
 
-- **amneziawg-tools** (`awg`), v3.1.20260812 — GPL-2.0. Upstream source: https://github.com/amnezia-vpn/amneziawg-tools (tag `v3.1.20260812`). Source license: https://github.com/amnezia-vpn/amneziawg-tools/blob/master/COPYING . When distributing the binary, comply with GPL-2.0 source-code obligations and preserve original license and copyright notices.
-- **amneziawg-go** (`amneziawg-go`) — MIT. Upstream source and LICENSE: https://github.com/amnezia-vpn/amneziawg-go . Preserve copyright and full MIT permission notice when distributing.
-- **LG webOSTV.js** is part of LG's webOS TV platform SDK. This repository intentionally does not redistribute the SDK file; obtain it from the official SDK and follow its terms.
-- **Russian IPv4 prefix list** is generated from externally maintained address allocation data. Its accuracy and redistribution terms need to be reviewed for a production release.
+GitHub Actions fetches those precise tags, verifies commit hashes, cross-compiles ARMv7 binaries, includes their license notices in the IPK, and attaches corresponding complete upstream source archives to the release. The original sources remain available under their upstream project licenses. Use the release sources and the workflow to reproduce the build.
 
-The separately published Homebrew IPK is a test build. Before describing a GitHub release as reproducible or redistributing new builds, identify the exact source commits, toolchain, and build inputs used for both binaries, provide the corresponding GPL source, and verify binary provenance. Do not assume the binaries were built from current upstream master.
+The minimal `src/webOSTV.js` bridge is separately written MIT-licensed code; no original LG SDK JavaScript bundle is distributed in GitHub IPKs.
 
-Sources:
-- https://github.com/amnezia-vpn/amneziawg-tools
-- https://github.com/amnezia-vpn/amneziawg-go
-- https://github.com/webosbrew/webos-homebrew-channel
+The Russian IPv4 prefix list is generated automatically from [RIPE NCC delegated statistics](https://ftp.ripe.net/pub/stats/ripencc/delegated-ripencc-latest), which can change over time. The list is not tied to the author's home network.
+
+No personal AmneziaWG profile, private key, IP address or VPN server settings are part of the source distribution.
+
+See also [upstream Go source](https://github.com/amnezia-vpn/amneziawg-go) and [upstream tools source](https://github.com/amnezia-vpn/amneziawg-tools).
