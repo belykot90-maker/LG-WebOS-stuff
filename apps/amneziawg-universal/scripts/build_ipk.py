@@ -7,9 +7,9 @@ from hashlib import sha256
 import argparse,io,tarfile,struct,json,gzip
 ROOT=Path(__file__).resolve().parents[1]
 APPID='com.konstantin.awguniversal'
-VERSION='1.0.1'
+VERSION='1.0.2'
 SOURCES=('manager.js','vpn.sh','boot.sh','boot-worker.sh','portal.js','portal.sh','portal.html')
-VENDOR=('webOSTV.js','awg','amneziawg-go','ru-ipv4.txt')
+VENDOR=('awg','amneziawg-go','ru-ipv4.txt')
 def tarball(files):
     stream=io.BytesIO()
     with tarfile.open(fileobj=stream,mode='w:') as ar:
@@ -30,7 +30,7 @@ def main():
     p.add_argument('--base-url',required=True,help='IPK download base URL for manifest')
     args=p.parse_args()
     required=[ROOT/'src'/n for n in SOURCES]+[ROOT/'vendor'/n for n in VENDOR]+[
-         ROOT/'src'/'index.html',ROOT/'src'/'install.sh',ROOT/'assets'/'icon.png']
+         ROOT/'src'/'index.html',ROOT/'src'/'install.sh',ROOT/'src'/'webOSTV.js',ROOT/'assets'/'icon.png']
     missing=[str(f.relative_to(ROOT)) for f in required if not f.is_file()]
     if missing:
         raise SystemExit('Required build inputs missing (not committed for licensing reasons): '+', '.join(missing))
@@ -42,10 +42,13 @@ def main():
            'index.html':(ROOT/'src'/'index.html').read_bytes(),
            'install.sh':(ROOT/'src'/'install.sh').read_bytes(),
            'icon.png':(ROOT/'assets'/'icon.png').read_bytes(),
-           'webOSTV.js':(ROOT/'vendor'/'webOSTV.js').read_bytes()}
+           'webOSTV.js':(ROOT/'src'/'webOSTV.js').read_bytes()}
     for n in SOURCES:files['files/'+n]=(ROOT/'src'/n).read_bytes()
     for n in ('awg','amneziawg-go'):files['files/'+n]=(ROOT/'vendor'/n).read_bytes()
     files['files/ru-ipv4.txt']=(ROOT/'vendor'/'ru-ipv4.txt').read_bytes()
+    for name,source in [('amneziawg-tools-GPL-2.0.txt','awg-tools-COPYING'),('amneziawg-go-MIT.txt','awg-go-LICENSE')]:
+        f=ROOT/'vendor'/source
+        if f.is_file(): files['licenses/'+name]=f.read_bytes()
     files={('./usr/palm/applications/'+APPID+'/'+n):b for n,b in files.items()}
     control=('Package: '+APPID+'\nVersion: '+VERSION+'\nSection: misc\nPriority: optional\n'
              'Architecture: all\nMaintainer: Konstantin\nDescription: Configurable AmneziaWG for webOS 4.x ARMv7\n').encode()
@@ -55,7 +58,8 @@ def main():
     (dst/fn).write_bytes(ipk)
     url=args.base_url.rstrip('/')+'/'+fn
     manifest={'id':APPID,'version':VERSION,'type':'web','title':'AmneziaWG Universal',
-              'iconUri':args.base_url.rstrip('/')+'/icons/amneziawg-universal.png',
+              'iconUri':'https://raw.githubusercontent.com/belykot90-maker/LG-WebOS-stuff/main/apps/amneziawg-universal/assets/icon.png',
+              'sourceUrl':'https://github.com/belykot90-maker/LG-WebOS-stuff','appDescription':'Self-configured AmneziaWG VPN for rooted LG webOS 4.x ARMv7',
               'ipkUrl':url,'ipkSize':len(ipk),'ipkHash':{'sha256':sha256(ipk).hexdigest()},
               'rootRequired':True}
     (dst/(APPID+'.manifest.json')).write_text(json.dumps(manifest,indent=2)+'\n')
