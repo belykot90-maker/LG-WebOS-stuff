@@ -28,7 +28,7 @@ Refresh applications. Both installable IPKs, manifests and icons are served via 
 - The optional phone-to-TV upload for `.conf` uses local **unencrypted HTTP** with a short-lived code. Use only on a trusted LAN; anyone able to monitor that network could intercept the private key.
 - There is no IPv6 tunnel, VPN kill switch or system DNS-leak protection in the VPN beta.
 - The optional yellow remote hold listener is disabled by default, and may conflict with another remote key listener if enabled at the same time.
-- VK AdSkip depends on third-party VK Video internals; ad detection is not guaranteed across future versions. No VK fonts or proprietary content are distributed.
+- VK AdSkip depends on the VK Video player: ad skipping is not guaranteed across versions. VK Video uses a special icon font for Play/Pause/Volume controls; where needed, the add-on can restore missing icons by reusing the font **already installed locally on the TV**. The font is neither bundled in GitHub downloads nor sent anywhere.
 
 ## Source, tests and licensing
 
