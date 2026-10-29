@@ -9,16 +9,6 @@
   },
   "packages": [
     {
-      "id": "com.konstantin.vkadskipuniversal",
-      "title": "VK AdSkip Universal",
-      "iconUri": "https://raw.githubusercontent.com/belykot90-maker/LG-WebOS-stuff/main/apps/vk-adskip/assets/icon.png",
-      "manifestUrl": "https://github.com/belykot90-maker/LG-WebOS-stuff/releases/download/vkadskip-v0.5.0/com.konstantin.vkadskipuniversal.manifest.json",
-      "category": "utility",
-      "pool": "main",
-      "shortDescription": "Experimental ad skip for VK Video on rooted LG webOS with safe rollback.",
-      "fullDescriptionUrl": "https://github.com/belykot90-maker/LG-WebOS-stuff/blob/main/apps/vk-adskip/README.md"
-    },
-    {
       "id": "com.konstantin.awguniversal",
       "title": "AmneziaWG Universal — webOS 4.x",
       "iconUri": "https://raw.githubusercontent.com/belykot90-maker/LG-WebOS-stuff/main/apps/amneziawg-universal/assets/icon.png",
@@ -27,6 +17,16 @@
       "pool": "main",
       "shortDescription": "Configurable AmneziaWG 3.1 VPN for rooted LG webOS 4.x ARMv7. Own VPS .conf required.",
       "fullDescriptionUrl": "https://github.com/belykot90-maker/LG-WebOS-stuff/blob/main/apps/amneziawg-universal/README.md"
+    },
+    {
+      "id": "com.konstantin.vkadskipuniversal",
+      "title": "VK AdSkip Universal",
+      "iconUri": "https://raw.githubusercontent.com/belykot90-maker/LG-WebOS-stuff/main/apps/vk-adskip/assets/icon.png",
+      "manifestUrl": "https://github.com/belykot90-maker/LG-WebOS-stuff/releases/download/vkadskip-v0.5.0/com.konstantin.vkadskipuniversal.manifest.json",
+      "category": "utility",
+      "pool": "main",
+      "shortDescription": "Experimental ad skip for VK Video on rooted LG webOS with safe rollback.",
+      "fullDescriptionUrl": "https://github.com/belykot90-maker/LG-WebOS-stuff/blob/main/apps/vk-adskip/README.md"
     }
   ]
 }
