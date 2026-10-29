@@ -1,23 +1,31 @@
 # LG webOS Stuff
 
-Open-source applications and utilities for rooted LG webOS TVs.
-
-This GitHub repository contains **universal source projects only**, with documentation, tests and build scripts. Personal VPN servers, private network addresses, passwords, API credentials, and user VPN profiles do **not** belong here.
+Open-source universal applications and utilities for rooted LG webOS TVs. All public downloads are hosted on **GitHub**. No personal VPN server or private profile is used for distribution.
 
 ## Applications
 
-| Project | Description | Compatibility | Status |
+| Application | Compatibility | Version | Download |
 | --- | --- | --- | --- |
-| [AmneziaWG Universal](apps/amneziawg-universal/README.md) | Configurable AmneziaWG VPN client for your own VPS | Rooted LG webOS 4.x / ARMv7; webOS 5.0+ not required | Public beta 1.0.1 |
+| [AmneziaWG Universal](apps/amneziawg-universal/README.md) | LG webOS **4.x**, ARMv7, root, Homebrew Channel; **does not require webOS 5.0+** | **1.0.2 beta** | [GitHub Release](https://github.com/belykot90-maker/LG-WebOS-stuff/releases/tag/awgu-v1.0.2) |
 
-Other universal applications can be added under `apps/` after review.
+Additional independent, universal apps may be added under `apps/` after testing.
 
-## Download and installation
+## Add repository to LG Homebrew Channel
 
-Installable releases will be published under this repository's **GitHub Releases** when packaging and licensing checks are complete. Public Homebrew installation instructions will use GitHub-hosted assets, not a maintainer's private VPS.
+In **Homebrew Channel → Settings → Add repository**, enter:
 
-## Privacy and security
+```text
+https://raw.githubusercontent.com/belykot90-maker/LG-WebOS-stuff/main/repo.json
+```
 
-Never commit user VPN configurations, endpoint details, server IP addresses, private keys or other secrets. AmneziaWG Universal's optional local import uses HTTP on a **trusted home network only**, because the profile includes a private key. DNS leak protection and IPv6 routing are not provided in this beta.
+Then refresh the app list. The catalog points exclusively to **GitHub Releases**. No separate Homebrew Channel app or server is necessary.
 
-This is an independent community project, unaffiliated with LG, Amnezia VPN, or the webOS Homebrew team.
+## AmneziaWG Universal limitations
+
+This experimental beta requires your **own** AmneziaWG VPS and configuration file (`.conf`). The private file is stored locally on your TV. The optional upload from a phone uses unencrypted HTTP on the local network; use only on a trusted LAN or choose an SSH/SFTP import. IPv6 tunneling and system DNS-leak protection are not provided. Compatibility is confirmed for the tested LG webOS 4.10 ARMv7 environment, but a full VPN connection to an independent user's server remains unverified.
+
+## Source and license
+
+The application source is published here under MIT; bundled official upstream AmneziaWG components keep their own GPL-2.0 and MIT terms. Every GitHub release includes a corresponding-source archive for the pinned upstream dependencies. [Licenses and notices](apps/amneziawg-universal/THIRD_PARTY_NOTICES.md).
+
+This is an independent community project unaffiliated with LG, Amnezia VPN or the webOS Homebrew project.
