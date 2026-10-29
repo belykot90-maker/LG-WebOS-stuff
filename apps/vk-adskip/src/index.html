@@ -1,0 +1,19 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>VK AdSkip Universal</title>
+<style>body{background:#101f2e;color:#eaf2fa;font:24px Arial;padding:50px}h1{font-size:48px}main{max-width:960px;margin:auto}p{color:#b4c9dc;line-height:1.5}button{background:#246f9c;color:white;font:24px Arial;padding:20px;border:0;border-radius:10px;margin:10px}button:focus{outline:4px solid white}pre{background:#1a3045;padding:22px;white-space:pre-wrap;min-height:90px}</style><script src="webOSTV.js"></script></head><body><main>
+<h1>VK AdSkip Universal</h1><p>Версия 0.5.0 — экспериментальный пропуск распознанной рекламы в установленном VK Видео. Требуется root / Homebrew Channel.</p>
+<button onclick="run('install')">Установить / обновить</button><button onclick="run('status')">Проверить</button><button onclick="run('uninstall')">Откатить</button>
+<pre id="out">Выберите действие.</pre><p>После установки или отката перезапустите VK Видео. Скрипт запускается автоматически внутри приложения VK Видео.</p>
+<script>
+function run(action){
+ if(['install','status','uninstall'].indexOf(action)<0)return;
+ var out=document.getElementById('out');out.textContent='Выполняется...';
+ var id='com.konstantin.vkadskipuniversal';
+ var p='/media/developer/apps/usr/palm/applications/'+id;
+ var q='/media/cryptofs/apps/usr/palm/applications/'+id;
+ var command='if [ -f '+p+'/install.sh ];then /bin/sh '+p+'/install.sh '+action+';else /bin/sh '+q+'/install.sh '+action+';fi';
+ if(!window.webOS||!webOS.service){out.textContent='Homebrew service not found';return;}
+ webOS.service.request('luna://org.webosbrew.hbchannel.service',{method:'exec',parameters:{command:command},
+ onSuccess:function(r){out.textContent=(r.stdoutString||'')+(r.stderrString||'')+(r.errorText||'')},
+ onFailure:function(r){out.textContent=r.errorText||'Error'}});
+}
+</script></main></body></html>
